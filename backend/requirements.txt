@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+pyodbc
+sqlalchemy
+python-dotenv
+networkx
+python-louvain
+fastapi-cache2

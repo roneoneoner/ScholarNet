@@ -1,0 +1,92 @@
+/* --- START OF FILE /frontend/css/layout.css --- */
+
+/* 應用程式外殼 */
+.app-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: var(--bg-base);
+}
+
+/* 應用程式標頭 (Header) */
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 24px;
+    background-color: var(--bg-surface);
+    border-bottom: 1px solid var(--border-default);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: var(--shadow-md);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-text h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.logo-text span {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* 頂部導覽列 (Tab Navigation) */
+.tab-nav {
+    display: flex;
+    gap: 8px;
+}
+
+/* 主要內容區 */
+.app-content {
+    flex: 1;
+    width: 100%;
+    max-width: 1400px;
+    /* 限制最大寬度，優化大螢幕體驗 */
+    margin: 0 auto;
+    padding: 24px;
+}
+
+/* Tab 面板切換邏輯 */
+.tab-panel {
+    display: none;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 網路圖容器 */
+.network-graph-container {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    max-height: 800px;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    margin: 20px 0;
+    box-shadow: var(--shadow-inner);
+    /* 內陰影 */
+}

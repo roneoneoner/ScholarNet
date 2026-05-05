@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ScholarNet Data Analytics</title>
+    <!-- 引入 Google Fonts: Inter 字型 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- 載入新的 CSS 檔案 -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</head>
+
+<body>
+    <div class="app-shell">
+        <!-- 重新設計的 Header -->
+        <header class="app-header">
+            <div class="logo">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="var(--accent-primary)" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M2 17L12 22L22 17" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    <path d="M2 12L12 17L22 12" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+                <div class="logo-text">
+                    <h1>ScholarNet</h1>
+                    <span>學術網絡分析平台</span>
+                </div>
+            </div>
+            <nav class="tab-nav">
+                <button class="tab-btn active" onclick="app.switchTab('info', event)">🧑‍💻 作者搜尋</button>
+                <button class="tab-btn" onclick="app.switchTab('coop', event)">🤝 合作儀表板</button>
+                <button class="tab-btn" onclick="app.switchTab('net', event)">🌐 網路中心性</button>
+                <button class="tab-btn" onclick="app.switchTab('nobel', event)">🏅 諾貝爾獎</button>
+                <button class="tab-btn" onclick="app.switchTab('raw', event)">📄 數據全覽</button>
+            </nav>
+        </header>
+
+        <main class="app-content">
+            <!-- ===== 1. 作者搜尋 Panel ===== -->
+            <div id="panel-info" class="tab-panel active">
+                <div class="page-container">
+                    <div class="search-section">
+                        <div class="basic-search">
+                            <input type="text" id="authorIdInfo" placeholder="輸入作者 ID 搜尋個人完整資料...">
+                            <button class="btn-primary" onclick="ui.searchFullProfile()">🔍 搜尋</button>
+                        </div>
+
+                        <div class="advanced-filter-card">
+                            <h3>📊 多維度智慧篩選</h3>
+                            <div class="filter-grid">
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>作者 ID (Scopus)</span></div>
+                                    <input type="text" id="searchAuthorId" placeholder="作者 ID">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>NSTC rsNo</span></div>
+                                    <input type="text" id="searchRsNo" placeholder="rsNo">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>中文姓名 (C302)</span></div>
+                                    <input type="text" id="searchNameCh" placeholder="中文姓名">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>英文姓名 (C302)</span></div>
+                                    <input type="text" id="searchNameEn" placeholder="英文姓名">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>機構名稱 (C302)</span></div>
+                                    <input type="text" id="searchC302Org" placeholder="機構名稱 (C302)">
+                                    <select id="selectC302Org" onchange="ui.addFilterTag('searchC302Org', this.value)">
+                                        <option value="">-- 快速選擇 --</option>
+                                    </select>
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>職稱 (C302)</span></div>
+                                    <input type="text" id="searchC302Title" placeholder="職稱 (C302)">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>姓氏 (Surname)</span></div>
+                                    <input type="text" id="searchSurname" placeholder="姓氏">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>名字 (Given Name)</span></div>
+                                    <input type="text" id="searchGivenName" placeholder="名字">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>機構名稱 (Scopus)</span></div>
+                                    <input type="text" id="searchAff" placeholder="機構名稱 (Scopus)">
+                                    <select id="selectAff" onchange="ui.addFilterTag('searchAff', this.value)">
+                                        <option value="">-- 快速選擇 --</option>
+                                    </select>
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>國家</span></div>
+                                    <input type="text" id="searchCountry" placeholder="國家">
+                                    <select id="selectCountry" onchange="ui.addFilterTag('searchCountry', this.value)">
+                                        <option value="">-- 快速選擇 --</option>
+                                    </select>
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>城市</span></div>
+                                    <input type="text" id="searchCity" placeholder="城市">
+                                    <select id="selectCity" onchange="ui.addFilterTag('searchCity', this.value)">
+                                        <option value="">-- 快速選擇 --</option>
+                                    </select>
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>最小 H-index</span></div>
+                                    <input type="number" id="searchHIndex" placeholder="最小 H-index" min="0">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>最小論文數</span></div>
+                                    <input type="number" id="searchDocCount" placeholder="最小論文數" min="0">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>最小被引用數</span></div>
+                                    <input type="number" id="searchCiteCount" placeholder="最小被引用數" min="0">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>Paper 摘要領域 (Top 5%)</span></div>
+                                    <input type="text" id="searchNonNstcArea" placeholder="摘要領域">
+                                    <select id="selectNonNstcArea" onchange="ui.addFilterTag('searchNonNstcArea', this.value)">
+                                        <option value="">-- 快速選擇 --</option>
+                                    </select>
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>國科會補助類別</span></div>
+                                    <input type="text" id="searchGrantCat" placeholder="補助類別">
+                                    <select id="selectGrantCat" onchange="ui.addFilterTag('searchGrantCat', this.value)">
+                                        <option value="">-- 快速選擇 --</option>
+                                    </select>
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>國科會學門代碼</span></div>
+                                    <input type="text" id="searchDiscCode" placeholder="學門代碼">
+                                    <select id="selectDiscCode" onchange="ui.addFilterTag('searchDiscCode', this.value)">
+                                        <option value="">-- 快速選擇 --</option>
+                                    </select>
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>國科會計畫名稱</span></div>
+                                    <input type="text" id="searchPlanName" placeholder="計畫名稱">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>出版年份 (起)</span></div>
+                                    <input type="number" id="searchPubStart" placeholder="出版年份 (起)">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>出版年份 (訖)</span></div>
+                                    <input type="number" id="searchPubEnd" placeholder="出版年份 (訖)">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>期刊名稱 (Scopus)</span></div>
+                                    <input type="text" id="searchPubName" placeholder="期刊名稱">
+                                </div>
+                                <div class="filter-item" style="flex-direction:row; gap:10px; align-items:center;">
+                                    <label><input type="checkbox" id="searchIsIeee"> 存在於 IEEE 資料</label>
+                                    <label><input type="checkbox" id="searchIsTop2"> 存在於 Top 2% 資料</label>
+                                </div>
+                            </div>
+                            <div class="filter-buttons">
+                                <button onclick="ui.searchByFilters()">執行篩選</button>
+                                <button onclick="ui.clearFilters()">重設篩選</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="author-result" class="result-section">
+                        <!-- Author search results will be rendered here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== 2. 合作儀表板 Panel ===== -->
+            <div id="panel-coop" class="tab-panel">
+                <div class="content-wrapper">
+                    <div class="control-section">
+                        <div class="control-row">
+                            <label for="coopType">分析類型：</label>
+                            <select id="coopType" onchange="coop.onTypeChange()">
+                                <option value="country">國家</option>
+                                <option value="affiliation">機構</option>
+                                <option value="author">作者</option>
+                            </select>
+                        </div>
+                        <div class="control-row">
+                            <input type="text" id="p" placeholder="主體">
+                            <input type="text" id="c" placeholder="篩選國家">
+                            <input type="text" id="a" placeholder="篩選機構">
+                            <input type="text" id="u" placeholder="篩選作者 ID">
+                        </div>
+                        <div class="control-row">
+                            <label for="coopLimit">顯示筆數：</label>
+                            <input type="number" id="coopLimit" value="20" min="1" max="100">
+                            <button onclick="coop.fetchAndRender()">執行分析</button>
+                            <button class="btn-export" onclick="ui.exportToImage('panel-coop', 'cooperation_analysis')">📸 匯出圖檔</button>
+                            </div>
+                            </div>
+
+                    <div class="chart-section" id="coop-dash">
+                        <canvas id="coopChart" style="display:none"></canvas>
+                        <!-- Dynamic blocks will be appended here -->
+                    </div>
+                    <div id="coop-table-res" class="result-section">
+                        <!-- Cooperation table results will be rendered here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== 3. 網路中心性 Panel ===== -->
+            <div id="panel-net" class="tab-panel">
+                <div class="content-wrapper">
+                    <h2>學術合作網絡中心性分析</h2>
+
+                    <div class="search-section">
+                        <div class="advanced-filter-card">
+                            <h3>多維度智慧篩選 (套用於網絡分析)</h3>
+                            <div class="filter-grid">
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>作者 ID (Scopus)</span></div>
+                                    <input type="text" id="netSearchAuthorId" placeholder="作者 ID">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>NSTC rsNo</span></div>
+                                    <input type="text" id="netSearchRsNo" placeholder="rsNo">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>中文姓名 (C302)</span></div>
+                                    <input type="text" id="netSearchNameCh" placeholder="中文姓名">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>英文姓名 (C302)</span></div>
+                                    <input type="text" id="netSearchNameEn" placeholder="英文姓名">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>機構名稱 (C302)</span></div>
+                                    <input type="text" id="netSearchC302Org" placeholder="機構名稱 (C302)">
+                                    <select id="selectNetC302Org" onchange="ui.addFilterTag('netSearchC302Org', this.value)">
+                                        <option value="">-- 快速選擇 --</option>
+                                    </select>
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>職稱 (C302)</span></div>
+                                    <input type="text" id="netSearchC302Title" placeholder="職稱 (C302)">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>姓氏 (Surname)</span></div>
+                                    <input type="text" id="netSearchSurname" placeholder="姓氏">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>名字 (Given Name)</span></div>
+                                    <input type="text" id="netSearchGivenName" placeholder="名字">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>機構名稱 (Scopus)</span></div>
+                                    <input type="text" id="netSearchAff" placeholder="機構名稱 (Scopus)">
+                                    <select id="selectNetAff" onchange="ui.addFilterTag('netSearchAff', this.value)">
+                                        <option value="">-- 快速選擇 --</option>
+                                    </select>
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>國家</span></div>
+                                    <input type="text" id="netSearchCountry" placeholder="國家">
+                                    <select id="selectNetCountry" onchange="ui.addFilterTag('netSearchCountry', this.value)">
+                                        <option value="">-- 快速選擇 --</option>
+                                    </select>
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>城市</span></div>
+                                    <input type="text" id="netSearchCity" placeholder="城市">
+                                    <select id="selectNetCity" onchange="ui.addFilterTag('netSearchCity', this.value)">
+                                        <option value="">-- 快速選擇 --</option>
+                                    </select>
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>最小 H-index</span></div>
+                                    <input type="number" id="netSearchHIndex" placeholder="最小 H-index" min="0">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>最小論文數</span></div>
+                                    <input type="number" id="netSearchDocCount" placeholder="最小論文數" min="0">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>最小被引用數</span></div>
+                                    <input type="number" id="netSearchCiteCount" placeholder="最小被引用數" min="0">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>Paper 摘要領域 (Top 5%)</span></div>
+                                    <input type="text" id="netSearchNonNstcArea" placeholder="摘要領域">
+                                    <select id="selectNetNonNstcArea" onchange="ui.addFilterTag('netSearchNonNstcArea', this.value)">
+                                        <option value="">-- 快速選擇 --</option>
+                                    </select>
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>國科會補助類別</span></div>
+                                    <input type="text" id="netSearchGrantCat" placeholder="補助類別">
+                                    <select id="selectNetGrantCat" onchange="ui.addFilterTag('netSearchGrantCat', this.value)">
+                                        <option value="">-- 快速選擇 --</option>
+                                    </select>
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>國科會學門代碼</span></div>
+                                    <input type="text" id="netSearchDiscCode" placeholder="學門代碼">
+                                    <select id="selectNetDiscCode" onchange="ui.addFilterTag('netSearchDiscCode', this.value)">
+                                        <option value="">-- 快速選擇 --</option>
+                                    </select>
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>國科會計畫名稱</span></div>
+                                    <input type="text" id="netSearchPlanName" placeholder="計畫名稱">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>出版年份 (起)</span></div>
+                                    <input type="number" id="netSearchPubStart" placeholder="出版年份 (起)">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>出版年份 (訖)</span></div>
+                                    <input type="number" id="netSearchPubEnd" placeholder="出版年份 (訖)">
+                                </div>
+                                <div class="filter-item">
+                                    <div class="filter-item-header"><span>期刊名稱 (Scopus)</span></div>
+                                    <input type="text" id="netSearchPubName" placeholder="期刊名稱">
+                                </div>
+                                <div class="filter-item" style="flex-direction:row; gap:10px; align-items:center;">
+                                    <label><input type="checkbox" id="netSearchIsIeee"> 存在於 IEEE 資料</label>
+                                    <label><input type="checkbox" id="netSearchIsTop2"> 存在於 Top 2% 資料</label>
+                                </div>
+                            </div>
+                            <div class="filter-buttons">
+                                <button onclick="network.analyzeCentrality()">分析篩選作者的合作網絡中心性</button>
+                                <button onclick="network.clearFilters()">重設篩選</button>
+                                <button class="btn-export" onclick="ui.exportToImage('panel-net', 'network_centrality')">📸 匯出圖檔</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="control-section">
+                        <div class="control-row">
+                            <label for="clusterSelect">選擇群體：</label>
+                            <select id="clusterSelect" disabled>
+                                <option value="">-- 請先分析並選擇群體 --</option>
+                            </select>
+                        </div>
+                        <div id="net-legend" style="margin-top:10px; font-size:12px; color:var(--text-sec);">
+                            💡 節點顏色代表「機構」，節點大小代表「介數中心性」。
+                        </div>
+                    </div>
+
+                    <!-- Container for network graph -->
+                    <div id="net-container" class="network-graph-container"></div>
+
+                    <!-- Table to display author details and centrality metrics -->
+                    <div id="net-table-res" class="result-section">
+                        <!-- Centrality analysis table will be rendered here -->
+                    </div>
+                    <div id="net-status" class="status-message"></div>
+                </div>
+            </div>
+
+            <!-- ===== 4. 數據全覽 Panel ===== -->
+            <div id="panel-raw" class="tab-panel">
+                <div class="content-wrapper">
+                    <h2>作者數據全欄位稽核</h2>
+                    <p style="color:var(--text-sec); margin-bottom:15px">此頁面會顯示該作者在所有關連資料表中的原始欄位，供精確比對使用。</p>
+                    <div class="search-section">
+                        <div class="basic-search">
+                            <input type="text" id="rawAuthorId" placeholder="輸入作者 ID 查看所有原始欄位">
+                            <button class="btn-primary" onclick="ui.searchRawData()">查看完整原始數據 🔍</button>
+                        </div>
+                    </div>
+                    <div id="raw-data-res" class="result-section" style="overflow-x: auto; margin-top:20px">
+                        <!-- Raw data table will be rendered here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== 5. 諾貝爾獎 Panel ===== -->
+            <div id="panel-nobel" class="tab-panel">
+                <div class="content-wrapper">
+                    <!-- Nobel Prize related content -->
+                    <div class="control-section">
+                        <div class="control-row">
+                            <label for="nobelYear">年份：</label>
+                            <input type="number" id="nobelYear" value="2023" min="1901">
+                            <label for="nobelCategory">領域：</label>
+                            <select id="nobelCategory"></select>
+                            <label for="nobelLimit">顯示筆數：</label>
+                            <input type="number" id="nobelLimit" value="30" min="1" max="100">
+                            <button onclick="nobel.fetchAndRender()">搜尋</button>
+                            <button class="btn-export" onclick="ui.exportToImage('panel-nobel', 'nobel_collaboration')">📸 匯出圖檔</button>
+                        </div>
+                    </div>
+                    <div id="nobel-dash" class="chart-section">
+                        <canvas id="nobelChart" style="display:none"></canvas>
+                        <!-- Dynamic blocks will be appended here -->
+                    </div>
+                    <div id="nobel-table-res" class="result-section">
+                        <!-- Nobel table results will be rendered here -->
+                    </div>
+                    <div id="nobel-details" class="details-section">
+                        <!-- Nobel details will be rendered here -->
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="modal-title">詳情</h3>
+                <button class="close-btn" onclick="ui.closeModal()">&times;</button>
+            </div>
+            <div id="modal-body" class="modal-body">
+                <!-- Content will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/coop.js"></script>
+    <script src="js/nobel.js"></script>
+    <script src="js/network.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
